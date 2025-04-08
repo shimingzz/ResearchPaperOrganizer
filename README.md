@@ -18,7 +18,7 @@
    pip install -r requirements.txt
    ```
 3. 設置環境變量
-   - 複製 `.env.example` 文件為 `.env`
+   - 建立文件為 `.env`
    - 在 `.env` 文件中添加您的 SiliconFlow API 密鑰
    ```
    SILICONFLOW_API_KEY=your_api_key_here
