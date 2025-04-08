@@ -1,0 +1,55 @@
+/* Custom styles for the application */
+
+/* Set minimum height for main content area */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Add some extra spacing for the main content */
+.container {
+    flex: 1;
+}
+
+/* Style for truncated text with ellipsis */
+.text-truncate {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Set fixed height for table to enable scrolling */
+.table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Fade in animation for alerts */
+.alert {
+    animation: fadein 0.5s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Styling for cards */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Footer styling */
+.footer {
+    padding: 1rem 0;
+    margin-top: auto;
+}

@@ -1,0 +1,150 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 font-weight-bold">學術 PDF 元數據處理與重命名工具</h5>
+                
+                {% if is_monitoring %}
+                <div class="monitoring-status">
+                    <span class="badge bg-success me-2">
+                        <i class="fas fa-cog fa-spin me-1"></i> 處理中
+                    </span>
+                    <form method="post" action="{{ url_for('stop_monitoring') }}" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-stop me-1"></i> 停止處理
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <span class="badge bg-secondary">
+                    <i class="fas fa-pause-circle me-1"></i> 閒置中
+                </span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <p>
+                    這個工具會處理指定資料夾中的所有PDF學術文件，提取元數據（作者、期刊/會議、年份、標題）。
+                    處理後將按照以下格式重命名:
+                </p>
+                <ul>
+                    <li><strong>學術論文:</strong> <code>作者姓氏_年份_期刊或會議縮寫_論文標題.pdf</code></li>
+                    <li><strong>書籍:</strong> <code>作者姓氏_年份_書名.pdf</code></li>
+                </ul>
+                
+                {% if is_monitoring %}
+                <div class="alert alert-info">
+                    <i class="fas fa-folder-open me-2"></i> 當前處理目錄: <strong>{{ monitor_dir }}</strong>
+                </div>
+                {% endif %}
+                
+                <form method="post" action="{{ url_for('start_monitoring') }}" class="mt-4">
+                    <div class="mb-3">
+                        <label for="directory" class="form-label">PDF檔案資料夾路徑</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-folder"></i></span>
+                            <input type="text" class="form-control" id="directory" name="directory" 
+                                   value="{{ monitor_dir }}" required 
+                                   placeholder="輸入含有PDF檔案的資料夾完整路徑">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-play me-1"></i> 開始處理
+                            </button>
+                        </div>
+                        <div class="form-text">輸入包含PDF文件的資料夾完整路徑（例如：/home/user/papers 或 C:\papers）</div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 font-weight-bold">處理日誌</h5>
+                <div>
+                    <span class="badge bg-primary" id="file-count">{{ processed_files|length }} 個文件</span>
+                    <button class="btn btn-sm btn-secondary ms-2" id="refresh-logs">
+                        <i class="fas fa-sync-alt"></i> 刷新
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="logs-table">
+                        <thead>
+                            <tr>
+                                <th>時間</th>
+                                <th>文件</th>
+                                <th>狀態</th>
+                                <th>詳細信息</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if processed_files %}
+                                {% for log in processed_files|reverse %}
+                                <tr class="{{ 'table-success' if log.status == 'success' else 'table-warning' if log.status == 'skipped' else 'table-danger' }}">
+                                    <td>{{ log.timestamp }}</td>
+                                    <td class="text-truncate" style="max-width: 200px;">
+                                        {{ log.original_path.split('/')[-1] }}
+                                    </td>
+                                    <td>
+                                        {% if log.status == 'success' %}
+                                            <span class="badge bg-success">成功</span>
+                                        {% elif log.status == 'skipped' %}
+                                            <span class="badge bg-warning">已跳過</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">錯誤</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info view-details" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#detailsModal"
+                                                data-log="{{ loop.index0 }}">
+                                            <i class="fas fa-info-circle"></i> 詳情
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">尚未處理任何文件</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">文件處理詳情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-content"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Store processed files data for details modal
+    const processedFiles = {{ processed_files|tojson }};
+</script>
+{% endblock %}
