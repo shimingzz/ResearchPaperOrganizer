@@ -58,16 +58,17 @@ def create_env_file():
     api_key = input("SiliconFlow API密鑰: ").strip()
     
     # 讀取.env.example文件
-    with open(env_example, 'r') as f:
+    with open(env_example, 'r', encoding='utf-8') as f:
         env_content = f.read()
+
     
     # 替換API密鑰
     env_content = env_content.replace("your_api_key_here", api_key)
     
     # 寫入.env文件
-    with open(env_file, 'w') as f:
+    with open(env_file, 'w', encoding='utf-8') as f:
         f.write(env_content)
-    
+
     print_color("成功創建.env文件！", Colors.GREEN)
 
 def install_dependencies():
