@@ -13,16 +13,11 @@
 ## 安裝和設置
 
 1. 克隆此倉庫
-2. 安裝依賴
+2. 安裝依賴並設置環境變量
    ```
-   pip install -r dependencies.txt
+   python setup_local.py
    ```
-3. 設置環境變量
-   - 建立文件為 `.env`
-   - 在 `.env` 文件中添加您的 SiliconFlow API 密鑰
-   ```
-   SILICONFLOW_API_KEY=your_api_key_here
-   ```
+執行後需要輸入 SiliconFlow API 密鑰
 
 ## 使用方法
 
