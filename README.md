@@ -15,7 +15,7 @@
 1. 克隆此倉庫
 2. 安裝依賴
    ```
-   pip install -r requirements.txt
+   pip install -r dependencies.txt
    ```
 3. 設置環境變量
    - 建立文件為 `.env`
